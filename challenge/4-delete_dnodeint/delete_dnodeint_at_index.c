@@ -1,69 +1,52 @@
-#!/usr/bin/python3
-"""
-User Model
-"""
-import hashlib
-import uuid
+#include "lists.h"
+#include <stdlib.h>
 
+/**
+ * delete_dnodeint_at_index - delete the node at index index of a dlistint_t list
+ * @head: pointer to the first element of the list
+ * @index: index of the node to delete
+ *
+ * Return: 1 if it succeeded, -1 if it failed
+ */
+int delete_dnodeint_at_index(dlistint_t **head, unsigned int index)
+{
+	dlistint_t *saved_head;
+	unsigned int i;
 
-class User():
-    """
-    User class:
-    - id: public string unique (uuid)
-    - password: private string hash in MD5
-    """
+	if (*head == NULL)
+		return (-1);
 
-    __password = None
+	saved_head = *head;
+	i = 0;
 
-    def __init__(self):
-        """
-        Initialize a new user:
-        - assigned an unique `id`
-        """
-        self.id = str(uuid.uuid4())
+	while (i < index && *head != NULL)
+	{
+		*head = (*head)->next;
+		i++;
+	}
 
-    @property
-    def password(self):
-        """
-        Password getter
-        """
-        return self.__password
+	if (i != index)
+	{
+		*head = saved_head;
+		return (-1);
+	}
 
-    @password.setter
-    def password(self, pwd):
-        """
-        Password setter:
-        - `None` if `pwd` is `None`
-        - `None` if `pwd` is not a string
-        - Hash `pwd` in MD5 before assign to `__password`
-        """
-        if pwd is None or type(pwd) is not str:
-            self.__password = None
-        else:
-            self.__password = hashlib.md5(
-                pwd.encode()
-            ).hexdigest().lower()
+	if (index == 0)
+	{
+		*head = (*head)->next;
+		if (*head != NULL)
+			(*head)->prev = NULL;
+		free(saved_head);
+		return (1);
+	}
 
-    def is_valid_password(self, pwd):
-        """
-        Valid password:
-        - `False` if `pwd` is `None`
-        - `False` if `pwd` is not a string
-        - `False` if `__password` is `None`
-        - Compare `__password` and the MD5 value of `pwd`
-        """
-        if pwd is None or type(pwd) is not str:
-            return False
+	(*head)->prev->next = (*head)->next;
 
-        if self.__password is None:
-            return False
+	if ((*head)->next != NULL)
+		(*head)->next->prev = (*head)->prev;
 
-        return hashlib.md5(
-            pwd.encode()
-        ).hexdigest().lower() == self.__password
+	free(*head);
+	*head = saved_head;
 
-
-if __name__ == '__main__':
-    print("Test User")
-
-    
+	return (1);
+}
