@@ -1,0 +1,94 @@
+# Simple Web Stack
+
+## Infrastructure Overview
+
+This infrastructure hosts www.foobar.com using one server.
+
+Domain: foobar.com
+DNS Record: www (A record)
+IP Address: 8.8.8.8
+
+## Architecture
+
+User (Browser)
+      |
+      v
+www.foobar.com
+      |
+      v
+DNS Resolution
+A Record: 8.8.8.8
+      |
+      v
+HTTP/HTTPS Request
+      |
+      v
++--------------------------------+
+| Server: 8.8.8.8                |
+|                                |
+| Nginx Web Server               |
+|        |                       |
+|        v                       |
+| Application Server             |
+|        |                       |
+|        +--> Application Files  |
+|        |                       |
+|        v                       |
+| MySQL Database                 |
+|                                |
++--------------------------------+
+      |
+      v
+HTTP/HTTPS Response
+      |
+      v
+User Browser
+
+## How It Works
+
+1. A user enters www.foobar.com into a browser.
+2. DNS resolves the domain to 8.8.8.8.
+3. The browser sends an HTTP/HTTPS request.
+4. Nginx receives the request.
+5. Nginx forwards dynamic requests to the application server.
+6. The application server executes the application code.
+7. The application queries MySQL when data is needed.
+8. The response is returned through Nginx to the browser.
+
+## Components
+
+Server:
+A computer that provides services over a network.
+
+Domain Name:
+A readable address used to access a website.
+
+DNS Record:
+The www record is an A record pointing to 8.8.8.8.
+
+Web Server:
+Nginx handles HTTP/HTTPS requests and serves static content.
+
+Application Server:
+Executes application code and handles business logic.
+
+Application Files:
+Contain the website source code.
+
+Database:
+MySQL stores and manages application data.
+
+Communication:
+The browser communicates with the server using
+HTTP or HTTPS over TCP/IP.
+
+## Infrastructure Issues
+
+1. Single Point of Failure (SPOF):
+If the server fails, the entire website becomes unavailable.
+
+2. Downtime During Maintenance:
+Deployments or service restarts may interrupt availability.
+
+3. Limited Scalability:
+One server cannot handle unlimited incoming traffic.
