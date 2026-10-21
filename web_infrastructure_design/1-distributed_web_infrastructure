@@ -1,0 +1,135 @@
+# Distributed Web Infrastructure
+
+## Overview
+
+This infrastructure hosts www.foobar.com using three servers:
+one HAProxy load balancer and two application servers.
+
+Domain: foobar.com
+DNS Record: www (A record)
+IP Address: 8.8.8.8
+
+## Architecture
+
+                    USER
+                     |
+                     v
+              www.foobar.com
+                     |
+                     v
+                 DNS
+                     |
+              A: 8.8.8.8
+                     |
+                     v
+              HAProxy
+           Load Balancer
+             Round Robin
+                     |
+             +-------+-------+
+             |               |
+             v               v
+         SERVER 1        SERVER 2
+         --------        --------
+         Nginx           Nginx
+            |               |
+         App Server      App Server
+            |               |
+         App Files       App Files
+            |               |
+         MySQL Primary   MySQL Replica
+             |               ^
+             +---------------+
+                Replication
+
+## Request Flow
+
+1. A user enters www.foobar.com in a browser.
+2. DNS resolves the domain to 8.8.8.8.
+3. The request reaches HAProxy.
+4. HAProxy distributes traffic using Round Robin.
+5. Nginx receives the request on the selected server.
+6. The application server executes the application code.
+7. The application communicates with MySQL.
+8. The response returns through Nginx and HAProxy.
+
+## Additional Components
+
+HAProxy:
+Distributes incoming requests across the two web servers.
+
+Second Server:
+Provides additional capacity and application redundancy.
+
+Second Nginx:
+Handles web requests on the second server.
+
+Second Application Server:
+Runs another instance of the application.
+
+Second Application Files:
+Provide the same application code on both servers.
+
+MySQL Replica:
+Maintains a replicated copy of the Primary database
+and can serve read queries.
+
+## Load Balancing Algorithm
+
+Algorithm: Round Robin
+
+Requests are distributed sequentially between
+available servers.
+
+Request 1 -> Server 1
+Request 2 -> Server 2
+Request 3 -> Server 1
+Request 4 -> Server 2
+
+## Active-Active Configuration
+
+Both application servers actively handle requests.
+
+Active-Active:
+Both servers process traffic simultaneously.
+
+Active-Passive:
+One server handles traffic while another remains
+on standby until failover is required.
+
+## Database Replication
+
+MySQL uses Primary-Replica replication.
+
+The Primary handles write operations.
+
+The Replica receives changes from the Primary
+and can serve read queries.
+
+Replication is usually asynchronous.
+
+Both application servers send writes to the Primary.
+Read queries may be sent to the Replica.
+
+## Infrastructure Issues
+
+1. Single Points of Failure
+
+HAProxy is a single point of failure.
+
+MySQL Primary failure prevents writes until
+failover is completed.
+
+2. Security Issues
+
+No firewall is configured.
+
+HTTPS is not enabled.
+
+HTTP traffic is not encrypted.
+
+3. No Monitoring
+
+There is no monitoring system to detect
+server failures, performance problems,
+application errors, or database replication lag.
