@@ -1,0 +1,173 @@
+# Scale Up Web Infrastructure
+
+## Overview
+
+This architecture improves the availability, scalability,
+and performance of www.foobar.com.
+
+The infrastructure includes:
+- Two HAProxy load balancers in a high-availability cluster
+- Two dedicated Nginx web servers
+- Two dedicated application servers
+- One MySQL Primary database server
+- One MySQL Replica database server
+
+## Architecture
+
+                        USER
+                         |
+                         v
+                  www.foobar.com
+                         |
+                         v
+                    DNS Server
+                         |
+                  A: 8.8.8.8
+                         |
+                         v
+                  Virtual IP
+                         |
+              +----------+----------+
+              |                     |
+              v                     v
+       +-------------+       +-------------+
+       | HAProxy LB1 |<----->| HAProxy LB2 |
+       |   Active    |       |   Standby   |
+       +-------------+       +-------------+
+              |                     |
+              +----------+----------+
+                         |
+                         v
+              +---------------------+
+              | WEB SERVER LAYER    |
+              |                     |
+              | Web Server 1: Nginx |
+              | Web Server 2: Nginx |
+              +---------------------+
+                         |
+                         v
+              +---------------------+
+              | APPLICATION LAYER   |
+              |                     |
+              | Application Server 1|
+              | Application Server 2|
+              | Application Files   |
+              +---------------------+
+                         |
+                         v
+              +---------------------+
+              | DATABASE LAYER      |
+              |                     |
+              | MySQL Primary       |
+              | MySQL Replica       |
+              +---------------------+
+
+## Request Flow
+
+1. A user enters www.foobar.com in a browser.
+2. DNS resolves the domain to 8.8.8.8.
+3. The request reaches the active HAProxy load balancer.
+4. HAProxy distributes requests using Round Robin.
+5. Nginx receives the request on an available web server.
+6. Nginx forwards dynamic requests to an application server.
+7. The application server executes the application code.
+8. The application communicates with the database.
+9. MySQL Primary handles writes.
+10. MySQL Replica can handle read queries.
+11. The response returns to the user's browser.
+
+## Additional Components
+
+### Additional Server
+
+An additional server provides more computing capacity
+and allows services to be separated.
+
+This improves resource isolation and makes scaling easier.
+
+### Second HAProxy Load Balancer
+
+The second HAProxy provides redundancy.
+
+If the active load balancer fails,
+the standby load balancer can take over.
+
+### HAProxy Cluster
+
+The load balancers use an Active-Passive configuration.
+
+Keepalived can manage a shared virtual IP
+using VRRP in a supported network environment.
+
+The active load balancer handles incoming traffic.
+
+The standby load balancer takes over
+when the active load balancer fails.
+
+### Dedicated Web Servers
+
+Nginx web servers handle HTTP/HTTPS requests,
+serve static files, and forward dynamic requests.
+
+Separating web servers allows independent scaling
+and reduces resource competition.
+
+### Dedicated Application Servers
+
+Application servers execute business logic
+and process dynamic requests.
+
+Each application server contains a copy
+of the application code.
+
+Separating application servers improves performance
+and allows independent deployment and scaling.
+
+### Dedicated Database Servers
+
+MySQL stores and manages application data.
+
+The Primary database accepts write operations.
+
+The Replica receives changes from the Primary
+and can handle read queries.
+
+Dedicated database servers improve resource isolation,
+performance tuning, and database administration.
+
+## Load Balancing
+
+Algorithm: Round Robin
+
+HAProxy distributes incoming requests sequentially
+across available web servers.
+
+Request 1 -> Web Server 1
+Request 2 -> Web Server 2
+Request 3 -> Web Server 1
+Request 4 -> Web Server 2
+
+## Benefits
+
+1. Better availability through load balancer redundancy.
+2. Better scalability through dedicated service layers.
+3. Improved resource isolation.
+4. Easier maintenance and troubleshooting.
+5. Independent scaling of web, application, and database layers.
+
+## Remaining Limitations
+
+1. The MySQL Primary is still the only writable database.
+2. Database failover is not automatic unless configured.
+3. Application servers must maintain consistent code versions.
+4. Load balancer failover requires correct cluster configuration.
+5. More servers increase infrastructure complexity and cost.
+
+## Conclusion
+
+This architecture improves the previous infrastructure
+by introducing a second HAProxy load balancer
+and separating web, application, and database services.
+
+It provides better scalability, availability,
+and infrastructure management.
