@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 /**
- * delete_dnodeint_at_index - deletes the node at index index of a dlistint_t list
- * @head: pointer to the head of the list
+ * delete_dnodeint_at_index - delete the node at index index of a dlistint_t list
+ * @head: pointer to the first element of the list
  * @index: index of the node to delete
  *
  * Return: 1 if it succeeded, -1 if it failed
@@ -18,28 +18,35 @@ int delete_dnodeint_at_index(dlistint_t **head, unsigned int index)
 
 	saved_head = *head;
 	i = 0;
-	while (saved_head != NULL && i < index)
+
+	while (i < index && *head != NULL)
 	{
-		saved_head = saved_head->next;
+		*head = (*head)->next;
 		i++;
 	}
 
-	if (saved_head == NULL)
+	if (i != index)
+	{
+		*head = saved_head;
 		return (-1);
+	}
 
 	if (index == 0)
 	{
-		*head = saved_head->next;
+		*head = (*head)->next;
 		if (*head != NULL)
 			(*head)->prev = NULL;
 		free(saved_head);
 		return (1);
 	}
 
-	saved_head->prev->next = saved_head->next;
-	if (saved_head->next != NULL)
-		saved_head->next->prev = saved_head->prev;
+	(*head)->prev->next = (*head)->next;
 
-	free(saved_head);
+	if ((*head)->next != NULL)
+		(*head)->next->prev = (*head)->prev;
+
+	free(*head);
+	*head = saved_head;
+
 	return (1);
 }
